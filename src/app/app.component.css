@@ -1,0 +1,19 @@
+body {
+    background-color:black;
+    color: white;
+    padding: 10px;
+    }
+
+button,input {
+    margin: 10px;
+}
+
+#circle {
+    margin: 10px 0px 50px 50px; 
+    width: 150px;
+    height: 150px;
+    -webkit-border-radius: 75px;
+    -moz-border-radius: 75px;
+    border-radius: 75px;
+    background: black;
+  }

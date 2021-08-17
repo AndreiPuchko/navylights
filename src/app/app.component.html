@@ -1,0 +1,14 @@
+<body>
+<div #navylight id="circle"></div>
+Enter
+<input  type="text" 
+        id="name" 
+        name="navy" required
+        [(ngModel)]="navytext"
+        minlength="4" 
+        disabled="True"
+        maxlength="10" 
+        size="18">
+<button (click)="onShow()">Show</button>
+
+</body>
