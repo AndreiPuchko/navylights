@@ -122,7 +122,6 @@ export class AppComponent {
       }
     }
     this.tmpText=this.tmpText.substr(1);
-    console.log("--",this.tmpText);
     return [0,0];
   }
 
