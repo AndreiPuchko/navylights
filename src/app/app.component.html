@@ -6,9 +6,10 @@ Enter
         name="navy" required
         [(ngModel)]="navytext"
         minlength="4" 
-        disabled="True"
-        maxlength="10" 
+        maxlength="18"
+        [disabled]="showing != ''"
         size="18">
-<button (click)="onShow()">Show</button>
-
+<button (click)="onShow()" [disabled]="showing  != ''">Show</button>
+<button (click)="onStop()" [disabled]="showing === ''">Stop</button>
+<div #errortext style="color:red"></div>
 </body>
