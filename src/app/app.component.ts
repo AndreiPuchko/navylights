@@ -121,6 +121,8 @@ export class AppComponent {
         return [value,value*2]
       }
     }
+    this.tmpText=this.tmpText.substr(1);
+    console.log("--",this.tmpText);
     return [0,0];
   }
 
@@ -174,7 +176,9 @@ export class AppComponent {
           serie.push(new Light("black",ecTime));
         }
       }
-      else break;
+      else {
+        continue;
+      };
     }
     
     var totalLong=0;
@@ -188,6 +192,8 @@ export class AppComponent {
     if (period-totalLong > 0 ){
       serie.push(new Light("black",period-totalLong));
     }
-  this.show(serie);
+    if (serie.length>0){
+      this.show(serie);
+    }
   }
 }
