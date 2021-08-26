@@ -1,7 +1,7 @@
 import { NumberSymbol } from '@angular/common';
 import { Component,ViewChild,ElementRef } from '@angular/core';
 
-export class Light {
+class Light {
   public color: string;
   public timeOn: number;
 
@@ -11,6 +11,16 @@ export class Light {
     }
  }
 
+class FlashCount {
+  one: number;
+  two: number;
+  constructor(one:number,two:number) {
+    this.one=one;
+    this.two=two;
+    }
+
+}
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -19,8 +29,10 @@ export class Light {
 
 export class AppComponent {
   title = 'navylights';
+  navytext: string = 'alorbuvir';
   // navytext: string = 'VQ(6)LFL4S';
-  navytext: string = 'VQ(9)10S';
+  // navytext: string = 'VQ(9)10S';
+  // navytext: string = 'VQ(2+1)';
   tmpText: string ="";
   showing: string  = "";
   @ViewChild('navylight') navylight!: ElementRef<HTMLInputElement>;
@@ -57,25 +69,46 @@ export class AppComponent {
     this.blink("black",1);
   }
 
-  getColor(){
-    var colors={Y:"yellow",
-                W:"white",
-                R:"red",
-                G:"green",
-                BU:"blue",
-                OR:"orange",
-                VI:"violet",
-    };
-    var color:string="white";
+  getColor():string[]{
+    let colorMap= new Map();
+    
+    colorMap.set("Y","yellow");
+    colorMap.set("OR","orange");
+    colorMap.set("W","white");
+    colorMap.set("R","red");
+    colorMap.set("G","green");
+    colorMap.set("BU","blue");
+    colorMap.set("VI","violet");
+    
+    let colorList= new Map();
+    let color = new Array();  
     this.cutLeadingSeparators();
-    Object.entries(colors).forEach(
-      ([key, value]) => {
-        if (this.tmpText.indexOf(key)>=0){
-          color=value;
-          this.tmpText=this.tmpText.replace(key,"");
-        }
+    //make colors sequence
+    let z=[...colorMap.keys()];
+    for (let i=0;i<z.length;i++){
+      var pos=0;
+      while (this.tmpText.indexOf(z[i],pos)>=0){
+        colorList.set(this.tmpText.indexOf(z[i],pos),z[i]);
+        pos=this.tmpText.indexOf(z[i],pos)+1;
+        // console.log(this.tmpText, colorSort);
       }
-    );
+    } 
+    //remove colors
+    for (let i=0;i<z.length;i++){
+      this.tmpText=this.tmpText.replace(z[i],"");
+    } 
+    //sort 
+    var colorSort=[...colorList.entries()].sort();
+    for (let i=0;i<colorSort.length;i++){
+      // console.log("++",colorSort1[i],colorSort1[i][1],colorMap.get(colorSort1[i][1]));
+      color.push(colorMap.get(colorSort[i][1]));
+      if (colorSort[i][1]==="OR") i++;
+    }
+
+    if (color.length===0){
+      color.push("white")
+    }
+    
     return color;
   }
   
@@ -104,7 +137,6 @@ export class AppComponent {
 
   getFlashType(){
     let flashTypes= new Map();
-
     flashTypes.set("Q",750);
     flashTypes.set("FL",1200);
     flashTypes.set("LFL",2000);
@@ -113,84 +145,104 @@ export class AppComponent {
     flashTypes.set("V.Q",600);
     flashTypes.set("UQ",320);
     flashTypes.set("U.Q",320);
+    flashTypes.set("OC",3000);
+    flashTypes.set("ISO",1000);
+    flashTypes.set("AL",1000);
+
     this.cutLeadingSeparators();
     for (let [key, value] of flashTypes){
       if (this.tmpText.startsWith(key)){
         this.tmpText=this.tmpText.substr((""+key).length);
         console.log(key,value,this.tmpText);
-        return [value,value*2]
+        var ec=value*2;
+        if (key==="OC") ec= value/4;
+        if (key==="ISO" || key==="AL") ec= value;
+        return [value,ec]
       }
     }
     this.tmpText=this.tmpText.substr(1);
     return [0,0];
   }
 
-  getFlashCount(){
-    let flashCount=1;
+  getFlashCount():FlashCount{
+    let flashCount=new FlashCount(1,0);
     if (this.tmpText.startsWith("(")) {
       var countStr=this.tmpText.substr(1,this.tmpText.indexOf(")")-1)
-      console.log(countStr);
-      if (countStr.indexOf(")")>=0 || countStr === "") {
+      if (countStr.indexOf(")")>=0 ) {
         this.showError("It has ( but does not have )");
-        return 0;
+        return flashCount;
       }
-      flashCount=parseInt(countStr);
-      this.tmpText=this.tmpText.substr(this.tmpText.indexOf(")")+1);
-      console.log(flashCount,"**");
+      else if (countStr === ""){
+        flashCount.one=1;
+      }
+      else {
+        flashCount.one=parseInt(countStr.split("+")[0]);
+        flashCount.two=parseInt(countStr.split("+")[1]);
+      }
     }
     return flashCount;
   }
 
   async onShow (){
-
     let serie : Light[]=[];
-    let ltTime=0;
-    let ecTime=0;
-    let period=0;
-    let flashCount=1;
-    let color="white";
+    let color=[];
     let flashValue=[];
+    this.showError("");
     
     this.tmpText=this.navytext.toUpperCase();
     
     //Is period at the end?
-    period=this.getPeriod();
+    var period=this.getPeriod();
     //Color selection
     color=this.getColor();
+
     while (this.tmpText!="") {
-      console.log(this.tmpText,"<<<<<");
-      ltTime=0;
-      flashCount=0;
-
       flashValue=this.getFlashType();
+      var ltTime=flashValue[0];
+      var ecTime=flashValue[1];
+      var flashCount=this.getFlashCount();
 
-      ltTime=flashValue[0];
-      ecTime=flashValue[1];
-
-      flashCount=this.getFlashCount();
-
-      if (flashCount!=0 && ecTime!=0){
-        for (var i=1 ; i<=flashCount;i++){
-          serie.push(new Light(color,ltTime));
-          serie.push(new Light("black",ecTime));
+      if (this.navytext.toUpperCase().startsWith("AL") && color.length>1){
+        for (let i=0;i<color.length;i++){
+          serie.push(new Light(color[i],ltTime));
         }
       }
-      else {
-        continue;
-      };
+      else
+      {
+          if (flashCount.one!=0 && ecTime!=0){
+            for (var i=1 ; i<=flashCount.one;i++){
+              console.log(i/color.length);
+              serie.push(new Light(color[0],ltTime));
+              serie.push(new Light("black",ecTime));
+            }
+          }
+          if (flashCount.two!=0 && ecTime!=0){
+            serie.push(new Light("black",ecTime));
+            for (var i=1 ; i<=flashCount.two;i++){
+              serie.push(new Light(color[0],ltTime));
+              serie.push(new Light("black",ecTime));
+            }
+          }
+          else {
+            continue;
+          };
+      }
     }
-    
-    var totalLong=0;
-    serie.forEach(element => {
-      totalLong=totalLong+element.timeOn;
-    });
-    if ((period === 0 && serie.length>2) || 
-          (period>0 && period-totalLong < 0) ){
-      period=totalLong*1.5;
+    // if not AL - apply period
+    if (!this.navytext.toUpperCase().startsWith("AL")){
+      var totalLong=0;
+      serie.forEach(element => {
+        totalLong=totalLong+element.timeOn;
+      });
+      if ((period === 0 && serie.length>2) || 
+            (period>0 && period-totalLong < 0) ){
+        period=totalLong*1.5;
+      }
+      if (period-totalLong > 0 ){
+        serie.push(new Light("black",period-totalLong));
+      }
     }
-    if (period-totalLong > 0 ){
-      serie.push(new Light("black",period-totalLong));
-    }
+    // show serie
     if (serie.length>0){
       this.show(serie);
     }
