@@ -29,9 +29,9 @@ class FlashCount {
 
 export class AppComponent {
   title = 'navylights';
-  navytext: string = 'alorbuvir';
+  // navytext: string = 'alorbuvir';
   // navytext: string = 'VQ(6)LFL4S';
-  // navytext: string = 'VQ(9)10S';
+  navytext: string = 'VQ(9)10S';
   // navytext: string = 'VQ(2+1)';
   tmpText: string ="";
   showing: string  = "";
