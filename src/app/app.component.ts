@@ -30,8 +30,9 @@ class FlashCount {
 export class AppComponent {
   title = 'navylights';
   // navytext: string = 'alorbuvir';
-  // navytext: string = 'VQ(6)LFL4S';
-  navytext: string = 'VQ(9)10S';
+  // navytext: string = 'FL(2)5S';
+  navytext: string = 'VQ(6)LFL';
+  // navytext: string = 'VQ(9)10S';
   // navytext: string = 'VQ(2+1)';
   tmpText: string ="";
   showing: string  = "";
@@ -207,20 +208,19 @@ export class AppComponent {
           serie.push(new Light(color[i],ltTime));
         }
       }
-      else
-      {
+      else{
           if (flashCount.one!=0 && ecTime!=0){
             for (var i=1 ; i<=flashCount.one;i++){
               console.log(i/color.length);
-              serie.push(new Light(color[0],ltTime));
-              serie.push(new Light("black",ecTime));
+              serie.push(new Light(color[0],ltTime/flashCount.one));
+              serie.push(new Light("black",ltTime/flashCount.one));
             }
           }
           if (flashCount.two!=0 && ecTime!=0){
-            serie.push(new Light("black",ecTime));
+            serie.push(new Light("black",ecTime/flashCount.one));
             for (var i=1 ; i<=flashCount.two;i++){
-              serie.push(new Light(color[0],ltTime));
-              serie.push(new Light("black",ecTime));
+              serie.push(new Light(color[0],ltTime/flashCount.one));
+              serie.push(new Light("black",ltTime/flashCount.one));
             }
           }
           else {
@@ -236,7 +236,7 @@ export class AppComponent {
       });
       if ((period === 0 && serie.length>2) || 
             (period>0 && period-totalLong < 0) ){
-        period=totalLong*1.5;
+        period=totalLong;
       }
       if (period-totalLong > 0 ){
         serie.push(new Light("black",period-totalLong));
