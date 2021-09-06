@@ -1,15 +1,41 @@
 <body>
-<div #navylight id="circle"></div>
-Light characteristic
-<input  type="text" 
-        id="name" 
-        name="navy" required
-        [(ngModel)]="navytext"
-        minlength="4" 
-        maxlength="18"
-        [disabled]="showing != ''"
-        size="18">
-<button (click)="onShow()" [disabled]="showing  != ''">Show</button>
-<button (click)="onStop()" [disabled]="showing === ''">Stop</button>
-<div #errortext style="color:red"></div>
+        <div class="align_center">
+                <div #navylight id="circle"></div>
+        </div>
+        <div class="align_center">
+                <div>
+                        <form>
+                        Light characteristic:
+                        <input  type="text" 
+                                id="inputtext" 
+                                name="navy" required
+                                minlength="4" 
+                                maxlength="18"
+                                size="18"
+                                [formControl] = "navyTextControl"
+                                [matAutocomplete] = "auto">
+
+                        <mat-autocomplete #auto="matAutocomplete">
+                                <mat-option *ngFor="let option of filteredCookiesLights | async" [value]="option">
+                                        {{option}}
+                                </mat-option>
+                        </mat-autocomplete>
+                        <br>
+                        <button (click)="onShow()" [disabled]="showing !=  ''">Show</button>
+                        <button (click)="onClear()" [disabled]="showing != ''">Clear</button>
+                        <button (click)="onStop()" [disabled]="showing === ''">Stop</button>
+                        
+                        </form>
+                </div>
+        </div>
+
+        <div #errortext style="color:red"></div>
+
+        <footer>
+                <div class="align_right">
+                        &copy; 2021 NavyLights
+                </div>
+        </footer>
+
+
 </body>

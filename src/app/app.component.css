@@ -1,19 +1,50 @@
 body {
     background-color:black;
     color: white;
-    padding: 10px;
+    padding: 1px;
     }
 
 button,input {
     margin: 10px;
 }
 
+#inputtext{
+    width: 50%;
+}
+
 #circle {
-    margin: 10px 0px 50px 50px; 
+    display: inline-block;
+    margin: 10% 10px 10% 10px; 
     width: 50px;
     height: 50px;
     -webkit-border-radius: 25px;
     -moz-border-radius: 25px;
     border-radius: 25px;
     background: black;
+  }
+
+footer{
+    display: flex;
+    position:fixed;
+    bottom:0px;
+    background-color:rgb(32, 32, 58);
+    width:100%;
+    }
+
+.align_right{margin-left: auto;
+    margin-right: 15px;
+    }
+
+.align_center{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.align_center div{
+    width: 60%;
+    display: inline-block;
+    background-color:rgb(32, 32, 58);
+    text-align: center;
+
   }

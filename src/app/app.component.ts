@@ -1,5 +1,8 @@
-import { NumberSymbol } from '@angular/common';
-import { Component,ViewChild,ElementRef } from '@angular/core';
+import { Component,ViewChild,ElementRef,OnInit } from '@angular/core';
+import { CookieService } from 'ngx-cookie-service'
+import { Observable } from 'rxjs';
+import { FormControl } from '@angular/forms';
+import { startWith, map } from 'rxjs/operators';
 
 class Light {
   public color: string;
@@ -27,24 +30,58 @@ class FlashCount {
   styleUrls: ['./app.component.css']
 })
 
-export class AppComponent {
+export class AppComponent implements OnInit{
   title = 'navylights';
+  // navytext: string = 'LFL(4)Y20S';
+  // navytext: string = 'alorbuvir';
+  // navytext: string = 'VQ(9)10S';
+  navytext: string = '';
   // navytext: string = 'alorbuvir';
   // navytext: string = 'FL(2)5S';
-  navytext: string = 'VQ(6)LFL';
-  // navytext: string = 'VQ(9)10S';
   // navytext: string = 'VQ(2+1)';
   tmpText: string ="";
   showing: string  = "";
+  cookiesLights: string[] = [];
+  defaultLights: string[] = ['VQ(3)5S','VQ(6)LFL10S','VQ(9)10S','VQ','FL(2)5S','VQ(2+1)','ALWR4S'];
+  filteredCookiesLights!: Observable<string[]>;
+  navyTextControl = new FormControl();
+
   @ViewChild('navylight') navylight!: ElementRef<HTMLInputElement>;
   @ViewChild('errortext') errortext!: ElementRef<HTMLInputElement>;
 
-  delay(ms: number) {
+  constructor(private cookieService: CookieService) {
+  }
+  
+  ngOnInit() {
+    this.navyTextControl.setValue(this.defaultLights[0]);
+    for (let i=0;i<this.defaultLights.length;i++){
+      this.navytext=this.defaultLights[i];
+      this.putCookie();
+    }
+    
+    this.filteredCookiesLights = this.navyTextControl.valueChanges.pipe(
+      startWith(''),
+      map(value => this._filter(value))
+    );
+  }
+
+  private _filter(value: string): string[] {
+    const filterValue = value.toUpperCase();
+    return this.cookiesLights.filter(cookiesLights => cookiesLights.includes(filterValue));
+  }
+
+    delay(ms: number) {
     return new Promise( resolve => setTimeout(resolve, ms) );
   }
 
   onStop(){
     this.showing="";
+    this.navyTextControl.enable();
+  }
+
+  onClear(){
+    this.showing="";
+    this.navyTextControl.setValue("");
   }
 
   showError(text:string){
@@ -57,14 +94,16 @@ export class AppComponent {
     await this.delay(delay);
   }
 
-
   async show (serie:Light[]){
+    this.putCookie();
     this.showing="Yes";
+    this.navyTextControl.disable();
     while (this.showing === "Yes") {
       for (let x=0; x<serie.length;x++){
         await this.blink(serie[x].color,serie[x].timeOn);
         if (this.showing != "Yes") break;
       }
+      console.log("end of serie");
       if (this.showing != "Yes") break;
     }
     this.blink("black",1);
@@ -154,7 +193,7 @@ export class AppComponent {
     for (let [key, value] of flashTypes){
       if (this.tmpText.startsWith(key)){
         this.tmpText=this.tmpText.substr((""+key).length);
-        console.log(key,value,this.tmpText);
+        // console.log(key,value,this.tmpText);
         var ec=value*2;
         if (key==="OC") ec= value/4;
         if (key==="ISO" || key==="AL") ec= value;
@@ -163,6 +202,24 @@ export class AppComponent {
     }
     this.tmpText=this.tmpText.substr(1);
     return [0,0];
+  }
+
+  putCookie(){
+    let list:string[]=[];
+    var listString = this.cookieService.get("navylights");
+    try {
+      list = JSON.parse(listString);
+      this.cookiesLights=list;
+    }
+    catch {
+
+    }
+    
+    if (this.navytext!="" && list.indexOf(this.navytext)<0){
+      list.push(this.navytext);
+      this.cookieService.set("navylights",JSON.stringify(list),60,"/");
+      this.cookiesLights=list;
+    }
   }
 
   getFlashCount():FlashCount{
@@ -178,7 +235,11 @@ export class AppComponent {
       }
       else {
         flashCount.one=parseInt(countStr.split("+")[0]);
-        flashCount.two=parseInt(countStr.split("+")[1]);
+        if (countStr.indexOf("+")>-1){
+          flashCount.two=parseInt(countStr.split("+")[1]);
+        }
+        
+        this.tmpText=this.tmpText.substr(this.tmpText.indexOf(")")+1);
       }
     }
     return flashCount;
@@ -188,39 +249,46 @@ export class AppComponent {
     let serie : Light[]=[];
     let color=[];
     let flashValue=[];
+    let flashCount=new FlashCount(0,0);
+    var totaFlashCount=0;
+
     this.showError("");
-    
+    this.navytext=this.navyTextControl.value;
     this.tmpText=this.navytext.toUpperCase();
     
-    //Is period at the end?
     var period=this.getPeriod();
-    //Color selection
     color=this.getColor();
 
     while (this.tmpText!="") {
       flashValue=this.getFlashType();
       var ltTime=flashValue[0];
       var ecTime=flashValue[1];
-      var flashCount=this.getFlashCount();
-
+      flashCount=this.getFlashCount();
+      if (flashCount.one+flashCount.two>1){
+        totaFlashCount=flashCount.one+flashCount.two;
+      }
+      
       if (this.navytext.toUpperCase().startsWith("AL") && color.length>1){
-        for (let i=0;i<color.length;i++){
-          serie.push(new Light(color[i],ltTime));
+        for (let z=0;z<flashCount.one;z++){
+          for (let i=0;i<color.length;i++){
+            serie.push(new Light(color[i],ltTime));
+            serie.push(new Light("black",ltTime));
+          }
         }
       }
       else{
+          var delta=((flashCount.one>3) ? 200*(1-1/flashCount.one):0);
           if (flashCount.one!=0 && ecTime!=0){
             for (var i=1 ; i<=flashCount.one;i++){
-              console.log(i/color.length);
-              serie.push(new Light(color[0],ltTime/flashCount.one));
-              serie.push(new Light("black",ltTime/flashCount.one));
+              serie.push(new Light(color[0],ltTime/flashCount.one +delta ));
+              serie.push(new Light("black",ecTime/flashCount.one+delta*ecTime/ltTime));
             }
           }
           if (flashCount.two!=0 && ecTime!=0){
             serie.push(new Light("black",ecTime/flashCount.one));
             for (var i=1 ; i<=flashCount.two;i++){
-              serie.push(new Light(color[0],ltTime/flashCount.one));
-              serie.push(new Light("black",ltTime/flashCount.one));
+              serie.push(new Light(color[0],ltTime/flashCount.one+delta));
+              serie.push(new Light("black",ecTime/flashCount.one+delta*ecTime/ltTime));
             }
           }
           else {
@@ -229,16 +297,31 @@ export class AppComponent {
       }
     }
     // if not AL - apply period
-    if (!this.navytext.toUpperCase().startsWith("AL")){
+    // if (!this.navytext.toUpperCase().startsWith("AL+"))
+    {
       var totalLong=0;
       serie.forEach(element => {
         totalLong=totalLong+element.timeOn;
       });
-      if ((period === 0 && serie.length>2) || 
-            (period>0 && period-totalLong < 0) ){
+      // if totaFlashCount>0 - must be a period
+      if (totaFlashCount>0 && period==0){
+        period=totalLong*1.5;
+      }
+
+      if (period>0 && period<=totalLong){ //serie too long - make it shorter
+        serie.forEach(element => {
+          element.timeOn=element.timeOn/(totalLong/(period/2));
+        });
+        totalLong=totalLong/(totalLong/(period/2));
+      }
+      // if (period==0 && (flashCount.one+flashCount.two)>0){
+      // }
+      
+      console.log(period,'--period');
+      if (period === 0 && serie.length>2) { //no period = fake period
         period=totalLong;
       }
-      if (period-totalLong > 0 ){
+      if (period > totalLong ){ // append ec for period time
         serie.push(new Light("black",period-totalLong));
       }
     }
