@@ -1,6 +1,7 @@
 body {
     background-color:black;
     color: white;
+    font-size:2vw;
     padding: 1px;
     }
 
@@ -26,6 +27,7 @@ button,input {
 footer{
     display: flex;
     position:fixed;
+    font-size:0.8vw;
     bottom:0px;
     background-color:rgb(32, 32, 58);
     width:100%;
@@ -46,5 +48,9 @@ footer{
     display: inline-block;
     background-color:rgb(32, 32, 58);
     text-align: center;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+
 
   }
