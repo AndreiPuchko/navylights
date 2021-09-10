@@ -16,13 +16,11 @@ class Light {
 }
 
 class FlashCount {
-  one: number;
-  two: number;
-  constructor(one: number, two: number) {
-    this.one = one;
-    this.two = two;
-  }
+  list: Array<number> = [];
 
+  sumFlash(): number {
+    return this.list.reduce((sum, cur) => sum + cur, 0);
+  }
 }
 
 @Component({
@@ -37,9 +35,15 @@ export class AppComponent implements OnInit {
   tmpText: string = "";
   showing: string = "";
   cookiesLights: string[] = [];
-  defaultLights: string[] = ['VQ(3)5S',
+  defaultLights: string[] = [
     'VQ(6)LFL10S',
-    'VQ(9)10S', 'VQ',
+    'VQ(9)10S',
+    'VQ(3)5S',
+    'VQ',
+    'ALWRW4S',
+    'Iso W 6s ',
+    'Fl (1+4+3)W 45s',
+    'Fl(1+2)R',
     'FL(2)5S',
     'VQ(2+1)',
     'ALWR4S'];
@@ -92,18 +96,17 @@ export class AppComponent implements OnInit {
 
   async blink(color: string, delay = 0) {
     this.navylight.nativeElement.style.background = color;
-    console.log(color, delay);
     await this.delay(delay);
   }
 
   putLog(serie: Light[]) {
-    var serieText = this.navytext+";";
+    var serieText = "[" + this.navytext + "]";
     for (let x = 0; x < serie.length; x++) {
       serieText = serieText +
-        serie[x].color.substr(0, 3) + ":" + Math.round(serie[x].timeOn) / 1000 + ",";
+        serie[x].color.substr(0, 3).replace("bla", "ec") + ":" + Math.round(serie[x].timeOn) / 1000 + ",";
     }
+    // console.log(serieText);
     serieText = encodeURIComponent(serieText);
-    console.log(serieText);
     this.http.get(window.location.href + "/log/?log=" +
       serieText,
       { responseType: 'blob' }).subscribe(data => { console.log("") })
@@ -114,12 +117,11 @@ export class AppComponent implements OnInit {
     this.putLog(serie);
     this.showing = "Yes";
     this.navyTextControl.disable();
-
     // console.log(serie);
 
     while (this.showing === "Yes") {
       for (let x = 0; x < serie.length; x++) {
-        // console.log(x,serie[x]);
+        console.log(x, serie[x]);
         await this.blink(serie[x].color, serie[x].timeOn);
         if (this.showing != "Yes") break;
       }
@@ -150,25 +152,19 @@ export class AppComponent implements OnInit {
       while (this.tmpText.indexOf(z[i], pos) >= 0) {
         colorList.set(this.tmpText.indexOf(z[i], pos), z[i]);
         pos = this.tmpText.indexOf(z[i], pos) + 1;
-        // console.log(this.tmpText, colorSort);
       }
     }
     //remove colors
-    for (let i = 0; i < z.length; i++) {
-      this.tmpText = this.tmpText.replace(z[i], "");
-    }
+    this.tmpText = this.tmpText.replace(/[/Y|OR|W|R|G|BU|VI//]/g, "");
     //sort 
     var colorSort = [...colorList.entries()].sort();
     for (let i = 0; i < colorSort.length; i++) {
-      // console.log("++",colorSort1[i],colorSort1[i][1],colorMap.get(colorSort1[i][1]));
       color.push(colorMap.get(colorSort[i][1]));
       if (colorSort[i][1] === "OR") i++;
     }
-
     if (color.length === 0) {
       color.push("white")
     }
-
     return color;
   }
 
@@ -178,19 +174,20 @@ export class AppComponent implements OnInit {
     if (this.tmpText.endsWith("S")) {
       this.tmpText = this.tmpText.substr(0, this.tmpText.length - 1);
       var lo = "";
-      while (/^\d+$/.test(this.tmpText[this.tmpText.length - 1])) {
+      while (/^\d+$/.test(this.tmpText[this.tmpText.length - 1]) ||
+        this.tmpText[this.tmpText.length - 1] === '.') {
         lo = this.tmpText[this.tmpText.length - 1] + lo;
         this.tmpText = this.tmpText.substr(0, this.tmpText.length - 1);
       }
       if (lo != "") {
-        period = parseInt(lo) * 1000;
+        period = parseFloat(lo) * 1000;
       }
     }
     return period
   }
 
   cutLeadingSeparators() {
-    while ("+.".indexOf(this.tmpText[0]) >= 0) {
+    while ("+[.\+]".indexOf(this.tmpText[0]) >= 0) {
       this.tmpText = this.tmpText.substr(1);
     }
   }
@@ -213,7 +210,6 @@ export class AppComponent implements OnInit {
     for (let [key, value] of flashTypes) {
       if (this.tmpText.startsWith(key)) {
         this.tmpText = this.tmpText.substr(("" + key).length);
-        // console.log(key,value,this.tmpText);
         var ec = value * 2;
         if (key === "OC") ec = value / 4;
         if (key === "ISO" || key === "AL") ec = value;
@@ -243,7 +239,7 @@ export class AppComponent implements OnInit {
   }
 
   getFlashCount(): FlashCount {
-    let flashCount = new FlashCount(1, 0);
+    let flashCount = new FlashCount();
     if (this.tmpText.startsWith("(")) {
       var countStr = this.tmpText.substr(1, this.tmpText.indexOf(")") - 1)
       if (countStr.indexOf(")") >= 0) {
@@ -251,46 +247,48 @@ export class AppComponent implements OnInit {
         return flashCount;
       }
       else if (countStr === "") {
-        flashCount.one = 1;
+        flashCount.list.push(1);
       }
       else {
-        flashCount.one = parseInt(countStr.split("+")[0]);
-        if (countStr.indexOf("+") > -1) {
-          flashCount.two = parseInt(countStr.split("+")[1]);
+        for (var x = 0; x < countStr.split("+").length; x++) {
+          flashCount.list.push(parseInt(countStr.split("+")[x]));
         }
-
         this.tmpText = this.tmpText.substr(this.tmpText.indexOf(")") + 1);
       }
+    }
+    else {
+      flashCount.list.push(1);
     }
     return flashCount;
   }
 
   async onShow() {
     let serie: Light[] = [];
-    let color = [];
+    let color: string[] = [];
     let flashValue = [];
-    let flashCount = new FlashCount(0, 0);
-    var totaFlashCount = 0;
+    let flashCount = new FlashCount();
+
+    this.navytext = this.navyTextControl.value.trim().toUpperCase();
+    this.tmpText = this.navytext.replace(/\s/g, "");
 
     this.showError("");
-    this.navytext = this.navyTextControl.value;
-    this.tmpText = this.navytext.toUpperCase();
 
     var period = this.getPeriod();
-    color = this.getColor();
 
     while (this.tmpText != "") {
       flashValue = this.getFlashType();
       var ltTime = flashValue[0];
       var ecTime = flashValue[1];
+      if (ltTime===0) {
+        continue
+      }
       flashCount = this.getFlashCount();
-
-      if (flashCount.one + flashCount.two > 1) {
-        totaFlashCount = flashCount.one + flashCount.two;
+      if (color.length === 0) {
+        color = this.getColor();
       }
 
-      if (this.navytext.toUpperCase().startsWith("AL") && color.length > 1) {
-        for (let z = 0; z < flashCount.one; z++) {
+      if (this.navytext.startsWith("AL") && color.length > 1) {
+        for (let z = 0; z < flashCount.list[0]; z++) {
           for (let i = 0; i < color.length; i++) {
             serie.push(new Light(color[i], ltTime));
             serie.push(new Light("black", ltTime));
@@ -298,52 +296,52 @@ export class AppComponent implements OnInit {
         }
       }
       else {
-        var delta = ((flashCount.one > 3) ? 200 * (1 - 1 / flashCount.one) : 0);
-        var realEcTime = ecTime / flashCount.one;
-        if (flashCount.one != 0 && ecTime != 0) {
-          for (var i = 1; i <= flashCount.one; i++) {
-            serie.push(new Light(color[0], ltTime / flashCount.one + delta));
-            serie.push(new Light("black", realEcTime + delta * ecTime / ltTime));
+        //magic delta
+        var delta = ((flashCount.sumFlash() > 3) ? 200 * (1 - 1 / flashCount.sumFlash()) : 0);
+        // console.log(delta, '<<<delta')
+        var realEcTime = ecTime / flashCount.sumFlash() + delta;
+        var realLtTime = ltTime / flashCount.sumFlash() + delta;
+        for (var z = 0; z < flashCount.list.length; z++) {
+          if (z > 0) { // for not first
+            serie.push(new Light("black", realEcTime * 2));
+            if (ltTime > ecTime) { // for OC lights
+              serie.push(new Light("black", 2 * realEcTime));
+            }
+          }
+          for (var i = 1; i <= flashCount.list[z]; i++) {
+            serie.push(new Light(color[0], realLtTime));
+            serie.push(new Light("black", realEcTime));
           }
         }
-        if (flashCount.two != 0 && ecTime != 0) {
-          // console.log(serie)
-          serie.push(new Light("black", realEcTime));
-          if (ltTime > ecTime) { // for OC lights
-            serie.push(new Light("black", 2 * realEcTime));
-          }
-          // console.log(serie)
-          for (var i = 1; i <= flashCount.two; i++) {
-            serie.push(new Light(color[0], ltTime / flashCount.one + delta));
-            serie.push(new Light("black", realEcTime + delta * ecTime / ltTime));
-          }
-        }
-        else {
-          continue;
-        };
       }
     }
-    var totalLong = 0;
-    serie.forEach(element => {
-      totalLong = totalLong + element.timeOn;
-    });
-    // if totaFlashCount>0 - must be a period
-    if (totaFlashCount > 0 && period == 0) {
-      period = totalLong * 1.5;
-    }
 
-    if (period > 0 && period <= totalLong) { //serie too long - make it shorter
+    if (this.navytext.startsWith("ISO") && period != 0 && serie.length === 2) {
+      serie[0].timeOn = serie[1].timeOn = period / 2;
+    }
+    else {
+      var totalLong = 0;
       serie.forEach(element => {
-        element.timeOn = element.timeOn / (totalLong / (period / 2));
+        totalLong = totalLong + element.timeOn;
       });
-      totalLong = totalLong / (totalLong / (period / 2));
-    }
+      // if flashCount.sumFlash()>0 - must be a period
+      if (flashCount.sumFlash() > 1 && period == 0) {
+        period = totalLong * 1.5;
+      }
 
-    if (period === 0 && serie.length > 2) { //no period = fake period
-      period = totalLong;
-    }
-    if (period > totalLong) { // append ec for period time
-      serie.push(new Light("black", period - totalLong));
+      if (period > 0 && period <= totalLong) { //serie too long - make it shorter
+        serie.forEach(element => {
+          element.timeOn = element.timeOn / (totalLong / (period / 2));
+        });
+        totalLong = totalLong / (totalLong / (period / 2));
+      }
+
+      if (period === 0 && serie.length > 2) { //no period = fake period
+        period = totalLong;
+      }
+      if (period > totalLong) { // append ec for period time
+        serie.push(new Light("black", period - totalLong));
+      }
     }
     // show serie
     if (serie.length > 0) {
