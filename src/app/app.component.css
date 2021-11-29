@@ -39,6 +39,11 @@ footer{
     width:100%;
 }
 
+canvas { 
+    position: absolute;
+    z-index: 1;
+}
+
 button{
     height: 40px;
     width:30%;
@@ -55,6 +60,7 @@ input{
 .inputform{
     padding: 20px;
     padding-top: 40px;
+    z-index: 2;
 }
 
 .align_center{
@@ -81,10 +87,10 @@ input{
     }
   }
 
-  #backgroundgif { 
+  /* #backgroundgif { 
     background-image:url("../assets/background.gif");
     background-repeat:repeat;
     background-size:cover;
     padding-left: 20px; 
-  }
+  } */
   

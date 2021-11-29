@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { FormControl } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { startWith, map } from 'rxjs/operators';
+import { ThrowStmt } from '@angular/compiler';
 
 class Light {
   public color: string;
@@ -30,6 +31,10 @@ class FlashCount {
 })
 
 export class AppComponent implements OnInit {
+  @ViewChild('canvas', { static: true }) canvas!: ElementRef<HTMLCanvasElement>;
+  private ctx: any;
+  rainInterval: any;
+
   title = 'navylights';
   navytext: string = '';
   tmpText: string = "";
@@ -49,7 +54,7 @@ export class AppComponent implements OnInit {
     'ALWR4S'];
   filteredCookiesLights!: Observable<string[]>;
   navyTextControl = new FormControl();
-
+  rainDrops: any = [];
   @ViewChild('navylight') navylight!: ElementRef<HTMLInputElement>;
   @ViewChild('errortext') errortext!: ElementRef<HTMLInputElement>;
 
@@ -58,7 +63,69 @@ export class AppComponent implements OnInit {
   ) {
   }
 
+  initRain() {
+    var qtRainDrops = 300;
+    var w = window.innerWidth;
+    var h = window.innerHeight;
+
+    for (var a = 0; a < qtRainDrops; a++) {
+      this.rainDrops[a] = {
+        x: Math.random() * w,
+        y: Math.random() * h,
+        l: Math.random() * 3,
+        xs: -4 + Math.random() * 4 + 2,
+        ys: Math.random() * 10 + 10
+      };
+    }
+  }
+
+  startRain() {
+    this.rainInterval = setInterval(() => {
+      this.drawRain()
+    },
+      100);
+  }
+
+  stopRain() {
+    clearInterval(this.rainInterval);
+  }
+
+  drawRain() {
+    var w = window.innerWidth;
+    var h = window.innerHeight;
+    this.ctx.clearRect(0, 0, w, h);
+    for (var c = 0; c < this.rainDrops.length; c++) {
+      var p = this.rainDrops[c];
+
+      // this.ctx.fillStyle = "white"
+      // this.ctx.fillRect(p.x, p.y, 5, 5)
+      this.ctx.lineWidth = 2;
+      this.ctx.strokeStyle = "white";
+      this.ctx.beginPath();
+      this.ctx.moveTo(p.x, p.y);
+      this.ctx.lineTo(p.x + p.l * p.xs, p.y + p.l * p.ys);
+      this.ctx.fill();
+      this.ctx.stroke();
+    }
+    // Move drops
+    for (var b = 0; b < this.rainDrops.length; b++) {
+      var p = this.rainDrops[b];
+      p.x += p.xs;
+      p.y += p.ys;
+      if (p.x > w || p.y > h) {
+        p.x = Math.random() * w;
+        p.y = -20;
+      }
+    }
+  }
+
   ngOnInit() {
+
+    this.ctx = this.canvas.nativeElement.getContext("2d");
+    this.canvas.nativeElement.width = window.innerWidth;
+    this.canvas.nativeElement.height = window.innerHeight;
+    this.initRain();
+
     this.navyTextControl.setValue(this.defaultLights[0]);
     for (let i = 0; i < this.defaultLights.length; i++) {
       this.navytext = this.defaultLights[i];
@@ -76,11 +143,8 @@ export class AppComponent implements OnInit {
     return this.cookiesLights.filter(cookiesLights => cookiesLights.includes(filterValue));
   }
 
-  delay(ms: number) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
-
   onStop() {
+    this.stopRain()
     this.showing = "";
     this.navyTextControl.enable();
   }
@@ -97,6 +161,10 @@ export class AppComponent implements OnInit {
   async blink(color: string, delay = 0) {
     this.navylight.nativeElement.style.background = color;
     await this.delay(delay);
+  }
+
+  delay(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   putLog(serie: Light[]) {
@@ -118,7 +186,7 @@ export class AppComponent implements OnInit {
     this.showing = "Yes";
     this.navyTextControl.disable();
     // console.log(serie);
-
+    this.startRain();
     while (this.showing === "Yes") {
       for (let x = 0; x < serie.length; x++) {
         console.log(x, serie[x]);
