@@ -1,6 +1,6 @@
 {
   "configVersion": 1,
-  "timestamp": 1631297013708,
+  "timestamp": 1633697553109,
   "index": "/index.html",
   "assetGroups": [
     {
@@ -13,7 +13,7 @@
       "urls": [
         "/favicon.ico",
         "/index.html",
-        "/main.0473577d77629b841bf0.js",
+        "/main.650a824df6cc28f074d4.js",
         "/manifest.webmanifest",
         "/polyfills.455d773f8334d842fb8f.js",
         "/runtime.905da8f4ecf44a92d946.js",
@@ -29,6 +29,7 @@
         "ignoreVary": true
       },
       "urls": [
+        "/assets/background.gif",
         "/assets/icons/icon-128x128.png",
         "/assets/icons/icon-144x144.png",
         "/assets/icons/icon-152x152.png",
@@ -36,13 +37,15 @@
         "/assets/icons/icon-384x384.png",
         "/assets/icons/icon-512x512.png",
         "/assets/icons/icon-72x72.png",
-        "/assets/icons/icon-96x96.png"
+        "/assets/icons/icon-96x96.png",
+        "/background.d9c99f247d9111726482.gif"
       ],
       "patterns": []
     }
   ],
   "dataGroups": [],
   "hashTable": {
+    "/assets/background.gif": "5b5cb425ad1f97ed57e2ff03177b2db4a51e80cf",
     "/assets/icons/icon-128x128.png": "dae3b6ed49bdaf4327b92531d4b5b4a5d30c7532",
     "/assets/icons/icon-144x144.png": "b0bd89982e08f9bd2b642928f5391915b74799a7",
     "/assets/icons/icon-152x152.png": "7479a9477815dfd9668d60f8b3b2fba709b91310",
@@ -51,9 +54,10 @@
     "/assets/icons/icon-512x512.png": "559d9c4318b45a1f2b10596bbb4c960fe521dbcc",
     "/assets/icons/icon-72x72.png": "c457e56089a36952cd67156f9996bc4ce54a5ed9",
     "/assets/icons/icon-96x96.png": "3914125a4b445bf111c5627875fc190f560daa41",
+    "/background.d9c99f247d9111726482.gif": "5b5cb425ad1f97ed57e2ff03177b2db4a51e80cf",
     "/favicon.ico": "22f6a4a3bcaafafb0254e0f2fa4ceb89e505e8b2",
-    "/index.html": "a1b1b566687123474c9106b02458d0f7a44a95ca",
-    "/main.0473577d77629b841bf0.js": "574374e8b41b1d99320f31272be3dd9c8a990181",
+    "/index.html": "2e658b3c78368cb4d9fd0093b81fce06a77bfcc9",
+    "/main.650a824df6cc28f074d4.js": "fd679370c7326fb66d076108a7a73f1db88d5720",
     "/manifest.webmanifest": "9f86b89a12eab0f3c33d63cddef60186c594990f",
     "/polyfills.455d773f8334d842fb8f.js": "5cb85a73286faa922fa0ce7093fe4ac49643f4c0",
     "/runtime.905da8f4ecf44a92d946.js": "e5d2983ff4eefdf7c0f5789e535ea216a1b0a386",

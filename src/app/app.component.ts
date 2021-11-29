@@ -205,6 +205,7 @@ export class AppComponent implements OnInit {
     flashTypes.set("OC", 3000);
     flashTypes.set("ISO", 1000);
     flashTypes.set("AL", 1000);
+    flashTypes.set("F", 1234);
 
     this.cutLeadingSeparators();
     for (let [key, value] of flashTypes) {
@@ -276,7 +277,12 @@ export class AppComponent implements OnInit {
     var period = this.getPeriod();
 
     while (this.tmpText != "") {
+      // alert(this.tmpText);
       flashValue = this.getFlashType();
+      // if (color.length === 0) {
+      //   color = this.getColor();
+      // }
+      // alert(this.tmpText);
       var ltTime = flashValue[0];
       var ecTime = flashValue[1];
       if (ltTime===0) {
@@ -294,6 +300,9 @@ export class AppComponent implements OnInit {
             serie.push(new Light("black", ltTime));
           }
         }
+      }
+      else if (ltTime=== 1234){ //fixed light
+        serie.push(new Light(color[0], ltTime));
       }
       else {
         //magic delta

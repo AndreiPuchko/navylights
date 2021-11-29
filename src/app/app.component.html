@@ -1,12 +1,14 @@
-<body>
+<body id="backgroundgif">
         <div class="align_center">
                 <div #navylight id="circle"></div>
         </div>
         <div class="align_center">
-                <div>
+                <div class="inputform">
                         <form>
                                 Light characteristic:
-                                <input type="text" id="inputtext" name="navy" required minlength="4" maxlength="18"
+                                <br>
+                                <br>
+                                <input type="text" id="inputtext" name="navy"
                                         size="18" [formControl]="navyTextControl" [matAutocomplete]="auto">
 
                                 <mat-autocomplete #auto="matAutocomplete">
