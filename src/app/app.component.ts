@@ -275,24 +275,26 @@ export class AppComponent implements OnInit {
     this.showError("");
 
     var period = this.getPeriod();
-
     while (this.tmpText != "") {
-      // alert(this.tmpText);
+      //for every non first section - duplicate period of black
+      if (serie.length > 0) {
+        serie.push(serie[serie.length - 1])
+      }
       flashValue = this.getFlashType();
-      // if (color.length === 0) {
-      //   color = this.getColor();
-      // }
-      // alert(this.tmpText);
+
       var ltTime = flashValue[0];
       var ecTime = flashValue[1];
-      if (ltTime===0) {
+      if (ltTime === 0) {
         continue
       }
       flashCount = this.getFlashCount();
+      // console.log(flashCount);
       if (color.length === 0) {
         color = this.getColor();
       }
 
+      // alert(flashCount.list.length);
+      // AL lights
       if (this.navytext.startsWith("AL") && color.length > 1) {
         for (let z = 0; z < flashCount.list[0]; z++) {
           for (let i = 0; i < color.length; i++) {
@@ -301,17 +303,16 @@ export class AppComponent implements OnInit {
           }
         }
       }
-      else if (ltTime=== 1234){ //fixed light
+      //fixed light
+      else if (ltTime === 1234) {
         serie.push(new Light(color[0], ltTime));
       }
+      //Regular lights
       else {
-        //magic delta
-        var delta = ((flashCount.sumFlash() > 3) ? 200 * (1 - 1 / flashCount.sumFlash()) : 0);
-        // console.log(delta, '<<<delta')
-        var realEcTime = ecTime / flashCount.sumFlash() + delta;
-        var realLtTime = ltTime / flashCount.sumFlash() + delta;
+        var realEcTime = ecTime;
+        var realLtTime = ltTime; flashCount.sumFlash();
         for (var z = 0; z < flashCount.list.length; z++) {
-          if (z > 0) { // for not first
+          if (z > 0) { // works for (2+1) etc
             serie.push(new Light("black", realEcTime * 2));
             if (ltTime > ecTime) { // for OC lights
               serie.push(new Light("black", 2 * realEcTime));
@@ -319,12 +320,12 @@ export class AppComponent implements OnInit {
           }
           for (var i = 1; i <= flashCount.list[z]; i++) {
             serie.push(new Light(color[0], realLtTime));
-            serie.push(new Light("black", realEcTime));
+            serie.push(new Light("black", realEcTime / 3));
           }
         }
       }
     }
-
+    // console.log(serie)
     if (this.navytext.startsWith("ISO") && period != 0 && serie.length === 2) {
       serie[0].timeOn = serie[1].timeOn = period / 2;
     }
