@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { FormControl } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { startWith, map } from 'rxjs/operators';
-import { ThrowStmt } from '@angular/compiler';
+
 
 class Light {
   public color: string;
@@ -95,12 +95,12 @@ export class AppComponent implements OnInit {
   }
 
   onRainCheck() {
-      var w = window.innerWidth;
-      var h = window.innerHeight;
-      this.ctx.clearRect(0, 0, w, h);
-      // if (this.showRainControl.value === true && this.showing === "Yes"){
-      //   this.startRain();
-      // }
+    var w = window.innerWidth;
+    var h = window.innerHeight;
+    this.ctx.clearRect(0, 0, w, h);
+    // if (this.showRainControl.value === true && this.showing === "Yes"){
+    //   this.startRain();
+    // }
   }
 
   drawRain() {
@@ -140,6 +140,7 @@ export class AppComponent implements OnInit {
     this.initRain();
 
     this.navyTextControl.setValue(this.defaultLights[0]);
+    this.navyTextControl.setValue("VQ(6)+LFl. 10s");
     this.lightRadiusControl.setValue(25);
     for (let i = 0; i < this.defaultLights.length; i++) {
       this.navytext = this.defaultLights[i];
@@ -242,7 +243,13 @@ export class AppComponent implements OnInit {
       }
     }
     //remove colors
-    this.tmpText = this.tmpText.replace(/[/Y|OR|W|R|G|BU|VI//]/g, "");
+    this.tmpText = this.tmpText.replace(/Y/gi, "");
+    this.tmpText = this.tmpText.replace(/OR/gi, "");
+    this.tmpText = this.tmpText.replace(/W/gi, "");
+    this.tmpText = this.tmpText.replace(/R/gi, "");
+    this.tmpText = this.tmpText.replace(/G/gi, "");
+    this.tmpText = this.tmpText.replace(/BU/gi, "");
+    this.tmpText = this.tmpText.replace(/VI/gi, "");
     //sort 
     var colorSort = [...colorList.entries()].sort();
     for (let i = 0; i < colorSort.length; i++) {
@@ -263,7 +270,9 @@ export class AppComponent implements OnInit {
       var lo = "";
       while (/^\d+$/.test(this.tmpText[this.tmpText.length - 1]) ||
         this.tmpText[this.tmpText.length - 1] === '.') {
-        lo = this.tmpText[this.tmpText.length - 1] + lo;
+        if (this.tmpText[this.tmpText.length - 1] === ".") {
+          lo = this.tmpText[this.tmpText.length - 1] + lo;
+        }
         this.tmpText = this.tmpText.substr(0, this.tmpText.length - 1);
       }
       if (lo != "") {
@@ -274,7 +283,7 @@ export class AppComponent implements OnInit {
   }
 
   cutLeadingSeparators() {
-    while ("+[.\+]".indexOf(this.tmpText[0]) >= 0) {
+    while ("+[.\+] ".indexOf(this.tmpText[0]) >= 0) {
       this.tmpText = this.tmpText.substr(1);
     }
   }
@@ -293,17 +302,21 @@ export class AppComponent implements OnInit {
     flashTypes.set("ISO", 1000);
     flashTypes.set("AL", 1000);
     flashTypes.set("F", 1234);
-
     this.cutLeadingSeparators();
+    // alert("-"+this.tmpText)
     for (let [key, value] of flashTypes) {
+      // console.log(key)
       if (this.tmpText.startsWith(key)) {
         this.tmpText = this.tmpText.substr(("" + key).length);
+        // alert("!"+this.tmpText)
+        // console.log("found key"+key+"-"+this.tmpText)
         var ec = value * 2;
         if (key === "OC") ec = value / 4;
         if (key === "ISO" || key === "AL") ec = value;
         return [value, ec]
       }
     }
+    // console.log("==" + this.tmpText)
     this.tmpText = this.tmpText.substr(1);
     return [0, 0];
   }
@@ -349,13 +362,13 @@ export class AppComponent implements OnInit {
     }
     return flashCount;
   }
-  // 
+  // Show button pressed
   async onShow() {
     let ra = this.lightRadiusControl.value;
-    this.navylight.nativeElement.style.borderRadius = ra+"px";
-    this.navylight.nativeElement.style.width = 2*ra+"px";
-    this.navylight.nativeElement.style.height = 2*ra+"px";
-    
+    this.navylight.nativeElement.style.borderRadius = ra + "px";
+    this.navylight.nativeElement.style.width = 2 * ra + "px";
+    this.navylight.nativeElement.style.height = 2 * ra + "px";
+
 
     let serie: Light[] = [];
     let color: string[] = [];
@@ -370,12 +383,19 @@ export class AppComponent implements OnInit {
     var period = this.getPeriod();
     // console.log(period);
     //parse until empty string
+    // alert("!!!"+this.tmpText)
     while (this.tmpText != "") {
       //for every non first section - duplicate period of black
       if (serie.length > 0) {
         serie.push(serie[serie.length - 1])
       }
+      // console.log(this.tmpText);
       flashValue = this.getFlashType();
+      if (flashValue[0] === 0 && flashValue[0] === 0) {
+        this.showError("Bad Light characteristic" + this.tmpText);
+        return
+      }
+      // console.log(flashValue);
 
       var ltTime = flashValue[0];
       var ecTime = flashValue[1];
