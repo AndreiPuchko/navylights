@@ -376,8 +376,7 @@ export class AppComponent implements OnInit {
     let flashCount = new FlashCount();
 
     this.navytext = this.navyTextControl.value.trim().toUpperCase();
-    this.tmpText = this.navytext.replace(/\s/g, "");
-
+    this.tmpText = this.navytext.replace(/\s/g, "").replace(/\./g, "");
     this.showError("");
 
     var period = this.getPeriod();
