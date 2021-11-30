@@ -54,6 +54,8 @@ export class AppComponent implements OnInit {
     'ALWR4S'];
   filteredCookiesLights!: Observable<string[]>;
   navyTextControl = new FormControl();
+  showRainControl = new FormControl();
+  lightRadiusControl = new FormControl();
   rainDrops: any = [];
   @ViewChild('navylight') navylight!: ElementRef<HTMLInputElement>;
   @ViewChild('errortext') errortext!: ElementRef<HTMLInputElement>;
@@ -80,14 +82,25 @@ export class AppComponent implements OnInit {
   }
 
   startRain() {
-    this.rainInterval = setInterval(() => {
-      this.drawRain()
-    },
-      100);
+    if (this.showRainControl.value === true) {
+      this.rainInterval = setInterval(() => {
+        this.drawRain()
+      },
+        30);
+    }
   }
 
   stopRain() {
     clearInterval(this.rainInterval);
+  }
+
+  onRainCheck() {
+      var w = window.innerWidth;
+      var h = window.innerHeight;
+      this.ctx.clearRect(0, 0, w, h);
+      // if (this.showRainControl.value === true && this.showing === "Yes"){
+      //   this.startRain();
+      // }
   }
 
   drawRain() {
@@ -127,6 +140,7 @@ export class AppComponent implements OnInit {
     this.initRain();
 
     this.navyTextControl.setValue(this.defaultLights[0]);
+    this.lightRadiusControl.setValue(25);
     for (let i = 0; i < this.defaultLights.length; i++) {
       this.navytext = this.defaultLights[i];
       this.putCookie();
@@ -147,11 +161,14 @@ export class AppComponent implements OnInit {
     this.stopRain()
     this.showing = "";
     this.navyTextControl.enable();
+    this.lightRadiusControl.enable();
+    this.showRainControl.enable();
   }
 
   onClear() {
     this.showing = "";
     this.navyTextControl.setValue("");
+    this.showError("");
   }
 
   showError(text: string) {
@@ -179,12 +196,14 @@ export class AppComponent implements OnInit {
       serieText,
       { responseType: 'blob' }).subscribe(data => { console.log("") })
   }
-
+  // show lights
   async show(serie: Light[]) {
     this.putCookie();
     this.putLog(serie);
     this.showing = "Yes";
     this.navyTextControl.disable();
+    this.lightRadiusControl.disable();
+    this.showRainControl.disable();
     // console.log(serie);
     this.startRain();
     while (this.showing === "Yes") {
@@ -330,8 +349,14 @@ export class AppComponent implements OnInit {
     }
     return flashCount;
   }
-
+  // 
   async onShow() {
+    let ra = this.lightRadiusControl.value;
+    this.navylight.nativeElement.style.borderRadius = ra+"px";
+    this.navylight.nativeElement.style.width = 2*ra+"px";
+    this.navylight.nativeElement.style.height = 2*ra+"px";
+    
+
     let serie: Light[] = [];
     let color: string[] = [];
     let flashValue = [];
@@ -343,6 +368,8 @@ export class AppComponent implements OnInit {
     this.showError("");
 
     var period = this.getPeriod();
+    // console.log(period);
+    //parse until empty string
     while (this.tmpText != "") {
       //for every non first section - duplicate period of black
       if (serie.length > 0) {
@@ -397,16 +424,21 @@ export class AppComponent implements OnInit {
     if (this.navytext.startsWith("ISO") && period != 0 && serie.length === 2) {
       serie[0].timeOn = serie[1].timeOn = period / 2;
     }
-    else {
+    else {//count total long of signals
       var totalLong = 0;
       serie.forEach(element => {
         totalLong = totalLong + element.timeOn;
       });
+      if (period != 0 && period < totalLong) {
+        // alert("Given period is less than total leght of signal");
+        this.showError("The given period is less than the total length of signals");
+        return
+      }
+
       // if flashCount.sumFlash()>0 - must be a period
       if (flashCount.sumFlash() > 1 && period == 0) {
         period = totalLong * 1.5;
       }
-
       if (period > 0 && period <= totalLong) { //serie too long - make it shorter
         serie.forEach(element => {
           element.timeOn = element.timeOn / (totalLong / (period / 2));
