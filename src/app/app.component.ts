@@ -4,7 +4,8 @@ import { Observable } from 'rxjs';
 import { FormControl } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { startWith, map } from 'rxjs/operators';
-import * as jison from 'jison';
+import { FindValueSubscriber } from 'rxjs/internal/operators/find';
+// import * as jison from "jison";
 
 class Light {
   public color: string;
@@ -140,7 +141,8 @@ export class AppComponent implements OnInit {
     this.initRain();
 
     this.navyTextControl.setValue(this.defaultLights[0]);
-    this.navyTextControl.setValue("VQ(6)+LFl. 10s");
+    // this.navyTextControl.setValue("VQRY(6+2)LFlBUOR(3+1). 10s");
+    this.navyTextControl.setValue("VQ");
     this.lightRadiusControl.setValue(25);
     for (let i = 0; i < this.defaultLights.length; i++) {
       this.navytext = this.defaultLights[i];
@@ -177,8 +179,10 @@ export class AppComponent implements OnInit {
   }
 
   async blink(color: string, delay = 0) {
-    this.navylight.nativeElement.style.background = color;
-    await this.delay(delay);
+    if (delay > 0) {
+      this.navylight.nativeElement.style.background = color;
+      await this.delay(delay);
+    }
   }
 
   delay(ms: number) {
@@ -362,8 +366,211 @@ export class AppComponent implements OnInit {
     }
     return flashCount;
   }
+
+
+  pushNextLight(lastLightList: any[], listOfLights: any[]) {
+    if (lastLightList.length != 0) {
+      let light = new Map();
+      light.set("lightType", lastLightList[0]);
+      light.set("lightColors", this.getListOfColors(lastLightList));
+      light.set("lightGroups", this.getListOfGroups(lastLightList));
+      listOfLights.push(light);
+      while (lastLightList.length != 0) { //clear list
+        lastLightList.pop();
+      }
+    }
+  }
+
+  getListOfLights(tmpText: string): string[] {
+    var reTypesOfLights = /(LFL|FL|OC|ISO|AL|Q|VQ|UQ|HQ)/;
+    var listOfLights: any[] = [];
+    var lastLightList: any[] = [];
+
+    // function pushNextLight() {
+    //   if (lastLightList.length != 0) {
+    //     listOfLights.push([lastLightList[0]]);
+    //     lastLightList = [];
+    //   }
+    // }
+
+    tmpText.split(reTypesOfLights).forEach(element => {
+      if (element != "") {
+        if (element.match(reTypesOfLights)) {
+          this.pushNextLight(lastLightList, listOfLights);
+        }
+        lastLightList.push(element);
+      }
+    });
+    this.pushNextLight(lastLightList, listOfLights);
+    return listOfLights;
+  }
+
+  getListOfColors(lightString: string[]): string[] {
+    var reColors = /(W|R|G|Y|OR|BU)/;
+    var listOfColors: string[] = [];
+    let colorMap = new Map();
+
+    colorMap.set("Y", "yellow");
+    colorMap.set("OR", "orange");
+    colorMap.set("W", "white");
+    colorMap.set("R", "red");
+    colorMap.set("G", "green");
+    colorMap.set("BU", "blue");
+    colorMap.set("VI", "violet");
+
+    if (lightString.length < 2) { //Single light? no color, no groups
+      return ["white"];
+    }
+    lightString[1].split(reColors).forEach(element => {
+      if (element.match(reColors)) {
+        listOfColors.push(colorMap.get(element));
+      }
+    });
+    if (listOfColors.length === 0) {
+      return ["white"];
+    }
+    return listOfColors;
+  }
+
+  getListOfGroups(lightString: string[]): string[] {
+    var listOfGroups: string[] = [];
+    var reGroups = /(\b\d+\b)/;
+    if (lightString.length < 2) { //Single light? no color, no groups
+      // return ['1'];
+      return listOfGroups;
+    }
+    lightString[1].split(reGroups).forEach(element => {
+      if (element.match(reGroups)) {
+        listOfGroups.push(element);
+      }
+    });
+    return listOfGroups
+  }
+
+  newOnShow() {
+    let flashTimes = new Map();
+    flashTimes.set("VQ", 250);
+    flashTimes.set("UQ", 120);
+    flashTimes.set("Q", 500);
+    flashTimes.set("FL", 1000);
+    flashTimes.set("LFL", 2000);
+    flashTimes.set("OC", 3000);
+    flashTimes.set("ISO", 2000);
+    flashTimes.set("AL", 2000);
+    flashTimes.set("F", 1000);
+
+    this.navytext = this.navyTextControl.value.trim().toUpperCase();
+    this.navytext = "F"
+    this.navytext = "OC"
+    this.navytext = "OC(2)"
+    this.navytext = "OC(2+1)"
+    this.navytext = "ISO"
+    this.navytext = "FL"
+    this.navytext = "FL(2)"
+    this.navytext = "LFL"
+    this.navytext = "FL(2+1)"
+    this.navytext = "Q"
+    this.navytext = "VQ"
+    this.navytext = "Q(3)"
+    this.navytext = "VQ(6)+LFL"
+    this.navytext = "UQ"
+    this.navytext = "ALWR"
+    var tmpNavyText = this.navytext.replace(/\s/, "").replace(/\./, "");
+
+    let serie: Light[] = [];
+    //Get period
+    var period = "";
+    const rePeriod = /[0-9]*S$/;
+    var isPeriod = tmpNavyText.match(rePeriod);
+    if (isPeriod != null) {
+      period = isPeriod[0];
+      tmpNavyText = tmpNavyText.replace(rePeriod, "");
+    }
+    // Split to lights
+    var listOfLights: any[] = this.getListOfLights(tmpNavyText);
+    //Build list of lights and eclipses
+    for (let i = 0; i < listOfLights.length; i++) {
+      const currentFlashType = listOfLights[i].get("lightType");
+      const currentGroups = listOfLights[i].get("lightGroups");
+      const currentColors = listOfLights[i].get("lightColors");
+      var interGroupMultiplier = 2;
+      console.log(currentFlashType, currentGroups, currentColors);
+
+      var lightColor = currentColors[0];
+      var eclipseColor = "black";
+
+      var lightTime = flashTimes.get(currentFlashType);
+      var eclipseTime = lightTime * 3;
+      // tuning times
+      if (currentFlashType === "F") eclipseTime = 0; // Fixed
+      else if (currentFlashType === "ISO") eclipseTime = lightTime;
+      else if (currentFlashType === "OC") { // swap light <> eclipse
+        if (currentGroups.length === 1) { // Group
+          lightTime = 2000;
+          eclipseTime = 1000;
+        }
+        else if (currentGroups.length > 1) { // composite group
+          lightTime = 1000;
+          eclipseTime = 1000;
+        }
+        else {
+          lightTime = 3000;
+          eclipseTime = 1000;
+        }
+        [lightColor, eclipseColor] = [eclipseColor, lightColor];
+        [eclipseTime, lightTime] = [lightTime, eclipseTime];
+      }
+      else if (currentFlashType === "FL") {
+        if (currentGroups.length === 1) eclipseTime = lightTime * 2;
+        if (currentGroups.length > 1) eclipseTime = lightTime;
+      }
+      else if (currentFlashType === "Q"
+        || currentFlashType === "VQ"
+        || currentFlashType === "UQ") {
+        eclipseTime = lightTime;
+        interGroupMultiplier = 0;
+      }
+      // create series
+      if (currentFlashType === "AL") { // Nothing but ALTERNATING
+        for (let colorIterCount = 0; colorIterCount < currentColors.length; colorIterCount++) {
+          serie.push(new Light(currentColors[colorIterCount], lightTime));
+        }
+      }
+      else { // anything else
+        // console.log(currentGroups);
+        if (currentGroups.length === 0) {  // No groups - single light
+          serie.push(new Light(lightColor, lightTime));
+          serie.push(new Light(eclipseColor, eclipseTime));
+        }
+        else {  // Group or composite group
+          for (let groupIterCount = 0; groupIterCount < currentGroups.length; groupIterCount++) {
+            for (let groupRepeat = 0; groupRepeat < parseInt(currentGroups[groupIterCount]); groupRepeat++) {
+              serie.push(new Light(lightColor, lightTime));
+              serie.push(new Light(eclipseColor, eclipseTime));
+            }
+            // eclipse between groups
+            serie.push(new Light(eclipseColor, eclipseTime * interGroupMultiplier));
+          }
+          if (currentGroups.length > 1) { // composite group gap
+            serie.push(new Light(eclipseColor, eclipseTime * 6));
+          }
+        }
+      }
+
+    }
+    // console.log(period);
+    // return
+    if (serie.length > 0) {
+      this.show(serie);
+    }
+
+  }
+
+
   // Show button pressed
-  async onShow() {
+  onShow() {
+    this.newOnShow();
+    return;
     let ra = this.lightRadiusControl.value;
     this.navylight.nativeElement.style.borderRadius = ra + "px";
     this.navylight.nativeElement.style.width = 2 * ra + "px";
@@ -380,9 +587,7 @@ export class AppComponent implements OnInit {
     this.showError("");
 
     var period = this.getPeriod();
-    // console.log(period);
     //parse until empty string
-    // alert("!!!"+this.tmpText)
     while (this.tmpText != "") {
       //for every non first section - duplicate period of black
       if (serie.length > 0) {
@@ -390,6 +595,7 @@ export class AppComponent implements OnInit {
       }
       // console.log(this.tmpText);
       flashValue = this.getFlashType();
+
       if (flashValue[0] === 0 && flashValue[0] === 0) {
         this.showError("Bad Light characteristic" + this.tmpText);
         return
