@@ -1,20 +1,16 @@
 <body id="backgroundgif">
         <canvas #canvas></canvas>
         <div class="align_center">
-
                 <div #navylight id="circle"></div>
         </div>
         <div class="align_center">
-
                 <div class="inputform">
-
                         <form>
                                 Light characteristic:
                                 <br>
                                 <br>
                                 <input type="text" id="inputtext" name="navy" size="18" [formControl]="navyTextControl"
                                         [matAutocomplete]="auto">
-
                                 <mat-autocomplete #auto="matAutocomplete">
                                         <mat-option *ngFor="let option of filteredCookiesLights | async"
                                                 [value]="option">
@@ -22,8 +18,13 @@
                                         </mat-option>
                                 </mat-autocomplete>
                                 <br>
-                                <button (click)="onShow()" [disabled]="showing !=  ''">Show</button>
+                                <button (click)="onShow2()" [disabled]="showing !=  ''"
+                                        style="background-color: lawngreen;">Show</button>
+<!--                                 <button (click)="onShow2()" [disabled]="showing !=  ''"
+                                        style="background-color: coral;">Show(IALA guide)</button> -->
                                 <button (click)="onClear()" [disabled]="showing != ''">Clear</button>
+
+
                                 <button (click)="onStop()" [disabled]="showing === ''">Stop</button>
                                 <br> <br>
                                 <div id="align_left">
@@ -36,17 +37,13 @@
                                         <input type="number" min="5" max="150" required
                                                 [formControl]="lightRadiusControl">
                                 </div>
-
                         </form>
                         <div #errortext style="color:red; font-size:large;"></div>
                 </div>
-
         </div>
-
         <footer>
                 <div class="align_right">
                         &copy; 2021 Andrei Puchko
                 </div>
         </footer>
-
 </body>
