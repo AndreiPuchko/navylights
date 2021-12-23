@@ -152,9 +152,9 @@ export class AppComponent implements OnInit {
     this.initRain();
 
     this.navyTextControl.setValue(this.defaultLights[0]);
-    this.navyTextControl.setValue("FVQRZ(6+2+d)LFlBU.10s");
+    // this.navyTextControl.setValue("FVQRZ(6+2+d)LFlBU.10s");
     // this.navyTextControl.setValue("VQ");
-    this.lightRadiusControl.setValue(25);
+    this.lightRadiusControl.setValue(10);
     for (let i = 0; i < this.defaultLights.length; i++) {
       this.navytext = this.defaultLights[i];
       this.putCookie();
@@ -665,7 +665,7 @@ export class AppComponent implements OnInit {
   }
 
   onShow2() {
-    this.testAllLights()
+    // this.testAllLights()
 
     let serie: Light[] = this.getLightSeries(this.navyTextControl.value);
 
