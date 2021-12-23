@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { FormControl } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { startWith, map } from 'rxjs/operators';
+import { prepareEventListenerParameters } from '@angular/compiler/src/render3/view/template';
 // import { FindValueSubscriber } from 'rxjs/internal/operators/find';
 // import * as jison from "jison";
 
@@ -585,9 +586,15 @@ export class AppComponent implements OnInit {
           totalLong = totalLong + element.timeOn;
         });
         if (totalLong < period * 1000) {
-          // serie.push(new Light(eclipseColor, period * 1000 - totalLong));
           serie[serie.length - 1].timeOn = serie[serie.length - 1].timeOn + (period * 1000 - totalLong);
         }
+        else if (period!=0){
+          period = Math.ceil(totalLong/1000)
+        }
+      }
+
+      if (period!=0){
+        realLight = realLight + period.toString() + "S"
       }
 
       if (serie.length > 0) {
