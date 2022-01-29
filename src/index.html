@@ -7,8 +7,6 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  
-  
 
   <title>Navylights</title>
   <!-- <base href="/"> -->
@@ -48,7 +46,28 @@
       })
     });
   </script>
-
+  <!-- check if app updated and reload -->
+  <script>
+    window.addEventListener("load", function () {
+      var me = null;
+      var scripts = document.getElementsByTagName("script")
+      for (var i = 0; i < scripts.length; ++i) {
+        var scrip_element = scripts[i];
+        if (scrip_element.getAttribute('src') != null &&
+          scrip_element.getAttribute('src').indexOf("main.") >= 0) {
+          var client = new XMLHttpRequest();
+          client.open('GET', scrip_element.getAttribute('src'));
+          client.onload = function () {
+            if (client.status == 404) {
+              console.log("Reload...");
+              window.location.reload()
+            }
+          }
+          client.send();
+        }
+      }
+    })
+  </script>
 </head>
 
 <body class="mat-typography">

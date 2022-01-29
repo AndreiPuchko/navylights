@@ -31,6 +31,7 @@ export class AppComponent implements OnInit {
   rainInterval: any;
 
   title = 'Navylights';
+  version = "0.0.11";
   navytext: string = '';
   tmpText: string = "";
   showing: string = "";
@@ -69,10 +70,10 @@ export class AppComponent implements OnInit {
   }
 
   initRain() {
-    var qtRainDrops = 300;
     var w = window.innerWidth;
     var h = window.innerHeight;
-
+    var qtRainDrops = w/4;
+    this.rainDrops = [];
     for (var a = 0; a < qtRainDrops; a++) {
       this.rainDrops[a] = {
         x: Math.random() * w,
@@ -85,6 +86,8 @@ export class AppComponent implements OnInit {
   }
 
   startRain() {
+    this.initRain();
+
     if (this.showRainControl.value === true) {
       this.rainInterval = setInterval(() => {
         this.drawRain()
@@ -110,6 +113,7 @@ export class AppComponent implements OnInit {
     var w = window.innerWidth;
     var h = window.innerHeight;
     this.ctx.clearRect(0, 0, w, h);
+    console.log(this.rainDrops.length);
     for (var c = 0; c < this.rainDrops.length; c++) {
       var p = this.rainDrops[c];
 
@@ -137,7 +141,7 @@ export class AppComponent implements OnInit {
 
   ngOnInit() {
     this.ctx = this.canvas.nativeElement.getContext("2d");
-    this.initRain();
+    // this.initRain();
 
     this.navyTextControl.setValue(this.defaultLights[0]);
     this.lightRadiusControl.setValue(10);
@@ -530,13 +534,10 @@ export class AppComponent implements OnInit {
 
   onShow() {
     // this.testAllLights()
+    this.showError("");
     this.canvas.nativeElement.width = window.innerWidth;
     this.canvas.nativeElement.height = this.seaview.nativeElement.clientHeight -70;
 
-    // this.seaview.nativeElement.children.item.
-
-    // alert(this.seaview.nativeElement.clientLeft);
-   
     let serie: Light[] = this.getLightSeries(this.navyTextControl.value);
 
     if (serie.length > 1) {
