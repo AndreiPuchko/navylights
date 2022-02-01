@@ -18,7 +18,8 @@
                                 </mat-autocomplete>
                                 <div id="rain_light_control">
                                         <button (click)="onShow()" [disabled]="showing !=  ''"
-                                                style="background-color: rgb(19, 82, 218);">Show</button>
+                                                id = "show_button"
+                                                >Show</button>
                                         <button (click)="onClear()" [disabled]="showing != ''">Clear</button>
                                         <button (click)="onStop()" [disabled]="showing === ''">Stop</button>
                                 </div>
