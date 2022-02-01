@@ -109,3 +109,10 @@ footer{
 .align_right{margin-left: auto;
     margin-right: 15px;
 }
+
+#errormessage{
+    color:red;
+    display: flex;
+    font-size: x-large;
+}
+                
