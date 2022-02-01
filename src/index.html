@@ -59,8 +59,9 @@
           client.open('GET', scrip_element.getAttribute('src'));
           client.onload = function () {
             if (client.status == 404) {
-              console.log("Reload...");
               window.location.reload()
+              console.log("Reload...");
+              console.log(scrip_element.getAttribute('src'));
             }
           }
           client.send();

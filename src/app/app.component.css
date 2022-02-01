@@ -1,7 +1,7 @@
-html, body {
+body {
     background-color:black;
     color: white;
-    overflow-y:visible;
+    height: 100%;
 }
 
 canvas { 
@@ -13,14 +13,11 @@ canvas {
 .align_center {
     align-items: center;
     justify-content: center;
-    /* border: beige 2px solid; */
+    /* display: flex; */
 }
 
 .align_center div{
     text-align: center;
-    -webkit-border-radius: 10px;
-    -moz-border-radius: 10px;
-    border-radius: 10px;
   }
 
   @media screen and (max-width: 980px) {
@@ -32,20 +29,14 @@ canvas {
 #seaview { 
     background-image:url("../assets/skyline.svg");
     background-repeat:no-repeat;
-    background-position: top center; 
-    /* background-size: 50%; */
+    background-position: top center;
     display: flex;
-    margin-top: -50px;
-    margin-bottom: -20px;
-    -webkit-border-radius: 5px;
-    -moz-border-radius: 5px;
-    border-radius: 5px;
   }
 
 #navylight {
     position: sticky;
     display: inline-block;
-    margin: 400px 10px 100px 0px;
+    margin: 373px 10px 100px 0px;
     width: 20px;
     height: 20px;
     border-radius: 10px;
@@ -53,19 +44,17 @@ canvas {
 }
 
 #toolbar{
-    display: flex;
+    /* display: flex; */
+    margin-top: -50px;
+    /* padding-bottom: 50px; */
 }
 
 .inputform{
-    padding: 20px;
-    /* padding-top: 40px; */
-    margin-top: 25px;
+    padding: 10px;
     z-index: 2;
     display: flex;
+    justify-content:center;
     background-color:black;
-    /* position: absolute; */
-    /* width:90%; */
-    /* bottom: 10%; */
 }
 
 input {

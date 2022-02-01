@@ -536,7 +536,7 @@ export class AppComponent implements OnInit {
     // this.testAllLights()
     this.showError("");
     this.canvas.nativeElement.width = window.innerWidth;
-    this.canvas.nativeElement.height = this.seaview.nativeElement.clientHeight -70;
+    this.canvas.nativeElement.height = this.seaview.nativeElement.clientHeight -50;
 
     let serie: Light[] = this.getLightSeries(this.navyTextControl.value);
 
