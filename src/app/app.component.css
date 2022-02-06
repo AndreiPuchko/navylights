@@ -1,8 +1,10 @@
 body {
-    background-color:black;
+    /* background-color:black; */
     color: white;
     height: 100%;
 }
+
+app-root {background-color: green;}
 
 canvas { 
     position: absolute;
