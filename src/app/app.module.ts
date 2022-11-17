@@ -8,8 +8,8 @@ import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FormsModule,ReactiveFormsModule  } from '@angular/forms';
-import { MatInputModule } from  '@angular/material/input'
-import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatLegacyInputModule as MatInputModule } from  '@angular/material/legacy-input'
+import { MatLegacyAutocompleteModule as MatAutocompleteModule } from '@angular/material/legacy-autocomplete';
 
 @NgModule({
   declarations: [
