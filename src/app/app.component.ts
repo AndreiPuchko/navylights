@@ -1,7 +1,7 @@
 import { Component, ViewChild, ElementRef, OnInit } from '@angular/core';
 import { CookieService } from 'ngx-cookie-service'
 import { Observable } from 'rxjs';
-import { FormControl } from '@angular/forms';
+import { UntypedFormControl } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { startWith, map } from 'rxjs/operators';
 
@@ -52,9 +52,9 @@ export class AppComponent implements OnInit {
     'ALWR4S'];
 
   filteredCookiesLights!: Observable<string[]>;
-  navyTextControl = new FormControl();
-  showRainControl = new FormControl();
-  lightRadiusControl = new FormControl();
+  navyTextControl = new UntypedFormControl();
+  showRainControl = new UntypedFormControl();
+  lightRadiusControl = new UntypedFormControl();
   rainDrops: any = [];
 
   constructor(private cookieService: CookieService,
